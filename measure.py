@@ -163,7 +163,7 @@ def compute_refusals(
     clip: float = 1.0,
     processor = None,  # processor parameter
     is_vision_model: bool = False,  # flag for vision models
-    token2: bool = False, # measure at second token instead of first
+    token_index: int = 1, # measure at second token instead of first
 ) -> torch.Tensor:
     # dtype = model.dtype
     if hasattr(model, "language_model"):
@@ -174,9 +174,7 @@ def compute_refusals(
             layer_base = layer_base.language_model
     num_layers = len(layer_base.layers)
 
-    pos = 1
-    if token2:
-        pos = 2
+    pos = token_index
 
     focus_layers = range(num_layers) # sweep all layers
 
@@ -337,9 +335,9 @@ if __name__ == "__main__":
         help="Remove projection along harmless direction from contrast direction",
     )
     parser.add_argument(
-        "--token2",
-        action="store_true",
-        default=False,
+        "--token-index",
+        type=int,
+        default=0,
         help="Measure after second token instead of after first token",
     )
 
@@ -533,7 +531,7 @@ if __name__ == "__main__":
         clip=args.clip,
         processor=processor,
         is_vision_model=has_vision,
-        token2=args.token2,
+        token_index=args.token_index,
     )
 
     print(f"Saving refusal information to {args.output}...")
